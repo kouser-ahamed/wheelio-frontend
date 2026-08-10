@@ -5,12 +5,10 @@ export type VehicleStatus = "AVAILABLE" | "BOOKED" | "MAINTENANCE" | "INACTIVE"
 export type BookingStatus =
   | "PENDING"
   | "CONFIRMED"
-  | "ONGOING"
-  | "COMPLETED"
-  | "CANCELLED"
   | "REJECTED"
+  | "CANCELLED"
 
-export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED" | "FAILED"
+export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED"
 
 export interface User {
   id: string
@@ -82,6 +80,7 @@ export interface Booking {
   totalPrice: string
   status: BookingStatus
   paymentStatus: PaymentStatus
+  paymentIntentId?: string | null
   isDeleted: boolean
   createdAt: string
   updatedAt: string

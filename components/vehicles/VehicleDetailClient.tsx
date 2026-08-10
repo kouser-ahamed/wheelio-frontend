@@ -157,15 +157,13 @@ export function VehicleDetailClient({ vehicleId }: { vehicleId: string }) {
     setSubmitting(true)
     try {
       const { default: axios } = await import("@/lib/axios")
-      const bookingRes = await axios.post<ApiResponse<{ id: string }>>(
-        "/bookings",
+      // Booking + Stripe Checkout session are created together: the booking is
+      // recorded immediately as UNPAID/PENDING and the customer is redirected
+      // straight to the Stripe payment page in the same request.
+      const checkoutRes = await axios.post<ApiResponse<{ url: string }>>(
+        "/payments/create-checkout-session",
         { vehicleId, startDate, endDate }
       )
-      const bookingId = bookingRes.data.data.id
-
-      const checkoutRes = await axios.post<
-        ApiResponse<{ url: string }>
-      >("/payments/create-checkout-session", { bookingId })
 
       const url = checkoutRes.data.data.url
       if (url) {

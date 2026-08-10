@@ -17,15 +17,12 @@ const STYLES: Record<string, string> = {
 
   PENDING: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   CONFIRMED: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  ONGOING: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  COMPLETED: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   CANCELLED: "bg-muted text-muted-foreground",
   REJECTED: "bg-red-500/10 text-red-600 dark:text-red-400",
 
   UNPAID: "bg-red-500/10 text-red-600 dark:text-red-400",
   PAID: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   REFUNDED: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  FAILED: "bg-muted text-muted-foreground",
 
   CUSTOMER: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
   VENDOR: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
@@ -34,9 +31,11 @@ const STYLES: Record<string, string> = {
 
 export function StatusBadge({
   status,
+  label,
   className,
 }: {
   status: Status
+  label?: string
   className?: string
 }) {
   return (
@@ -44,7 +43,7 @@ export function StatusBadge({
       variant="secondary"
       className={cn("border-transparent", STYLES[status], className)}
     >
-      {status}
+      {label ?? status}
     </Badge>
   )
 }

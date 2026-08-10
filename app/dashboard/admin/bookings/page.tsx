@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Trash2 } from "lucide-react"
+import { Calendar, Eye, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { ViewBookingDialog } from "@/components/bookings/ViewBookingDialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
@@ -33,6 +34,7 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
+  const [viewingBooking, setViewingBooking] = useState<Booking | null>(null)
 
   const load = async () => {
     try {
@@ -95,10 +97,8 @@ export default function AdminBookingsPage() {
               <SelectItem value="ALL">All Statuses</SelectItem>
               <SelectItem value="PENDING">Pending</SelectItem>
               <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-              <SelectItem value="ONGOING">Ongoing</SelectItem>
-              <SelectItem value="COMPLETED">Completed</SelectItem>
-              <SelectItem value="CANCELLED">Cancelled</SelectItem>
               <SelectItem value="REJECTED">Rejected</SelectItem>
+              <SelectItem value="CANCELLED">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -122,6 +122,7 @@ export default function AdminBookingsPage() {
                   <TableHead>Vendor</TableHead>
                   <TableHead>Dates</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Payment</TableHead>
                   <TableHead className="text-right">Total Price</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -143,18 +144,31 @@ export default function AdminBookingsPage() {
                     <TableCell>
                       <StatusBadge status={booking.status} />
                     </TableCell>
+                    <TableCell>
+                      <StatusBadge status={booking.paymentStatus} />
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(booking.totalPrice)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteBooking(booking)}
-                      >
-                        <Trash2 className="size-3.5 mr-1" />
-                        Delete
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setViewingBooking(booking)}
+                        >
+                          <Eye className="size-3.5 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteBooking(booking)}
+                        >
+                          <Trash2 className="size-3.5 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -179,16 +193,29 @@ export default function AdminBookingsPage() {
                   <p><span className="font-medium text-foreground">Vehicle:</span> {booking.vehicle?.name ?? "—"}</p>
                   <p><span className="font-medium text-foreground">Vendor:</span> {booking.vehicle?.vendor?.name ?? "—"}</p>
                   <p><span className="font-medium text-foreground">Dates:</span> {formatDate(booking.startDate)} → {formatDate(booking.endDate)}</p>
-                  <div className="mt-2 flex items-center justify-between font-semibold text-sm">
+                  <div className="mt-2 flex items-center gap-2">
+                      <StatusBadge status={booking.status} />
+                      <StatusBadge status={booking.paymentStatus} />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between font-semibold text-sm">
                     <span>Total:</span>
                     <span>{formatCurrency(booking.totalPrice)}</span>
                   </div>
                 </CardContent>
-                <CardFooter className="p-4 pt-0">
+                <CardFooter className="flex gap-2 p-4 pt-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setViewingBooking(booking)}
+                  >
+                    <Eye className="size-4 mr-1" />
+                    View
+                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="w-full"
+                    className="flex-1"
                     onClick={() => deleteBooking(booking)}
                   >
                     <Trash2 className="size-4 mr-1" />
@@ -200,6 +227,14 @@ export default function AdminBookingsPage() {
           </div>
         </>
       )}
+
+      <ViewBookingDialog
+        booking={viewingBooking}
+        open={!!viewingBooking}
+        onOpenChange={(open) => {
+          if (!open) setViewingBooking(null)
+        }}
+      />
     </div>
   )
 }

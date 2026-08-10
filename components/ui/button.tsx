@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -48,7 +50,14 @@ function Button({
   render,
   children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { render?: React.ReactElement }) {
+}: ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    render?: React.ReactElement<{
+      className?: string
+      children?: React.ReactNode
+      onClick?: React.MouseEventHandler<HTMLButtonElement>
+    }>
+  }) {
   const classes = cn(buttonVariants({ variant, size, className }))
 
   // If a `render` element is provided (common pattern in this codebase,
@@ -59,7 +68,9 @@ function Button({
     return React.cloneElement(render, {
       className: cn(classes, render.props.className),
       children: renderedChildren,
-      onClick: (e: any) => {
+      onClick: (
+        e: Parameters<NonNullable<ButtonPrimitive.Props['onClick']>>[0]
+      ) => {
         // call both element's onClick and user passed onClick if present
         if (render.props.onClick) render.props.onClick(e)
         if (props.onClick) props.onClick(e)
