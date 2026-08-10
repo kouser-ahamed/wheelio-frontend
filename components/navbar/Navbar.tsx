@@ -154,14 +154,14 @@ export function Navbar() {
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="flex items-center gap-2">
+                <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground flex items-center gap-2">
                   <span className="truncate">
                     {user.name}
                     <span className="block text-xs font-normal text-muted-foreground">
                       {user.email}
                     </span>
                   </span>
-                </DropdownMenuLabel>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDashboardClick}>
                   <LayoutDashboard />

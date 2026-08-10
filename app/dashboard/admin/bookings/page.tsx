@@ -1,11 +1,22 @@
 "use client"
 
+import { Calendar, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
-import { PageLoader } from "@/components/shared/Loader"
-import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { PageHeader } from "@/components/shared/PageHeader"
 import { StatusBadge } from "@/components/shared/StatusBadge"
+import { TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -21,79 +32,173 @@ import type { ApiResponse, Booking } from "@/types"
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
+
+  const load = async () => {
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      const res = await axios.get<ApiResponse<Booking[]>>("/bookings", {
+        params: { limit: 100 },
+      })
+      setBookings(res.data.data ?? [])
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    let active = true
-    async function load() {
-      try {
-        const { default: axios } = await import("@/lib/axios")
-        const res = await axios.get<ApiResponse<Booking[]>>("/bookings", {
-          params: { limit: 100 },
-        })
-        if (active) setBookings(res.data.data ?? [])
-      } catch (err) {
-        if (active) setError(getErrorMessage(err))
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
     load()
-    return () => {
-      active = false
-    }
   }, [])
 
-  if (loading) return <PageLoader label="Loading bookings..." />
+  const deleteBooking = async (booking: Booking) => {
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      await axios.delete(`/bookings/${booking.id}`)
+      setBookings((prev) => prev.filter((b) => b.id !== booking.id))
+      toast.success("Booking deleted successfully")
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }
+
+  const filteredBookings = bookings.filter((booking) => {
+    if (statusFilter === "ALL") return true
+    return booking.status === statusFilter
+  })
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="All Bookings" description="System-wide rental bookings overview." />
+        <TableSkeleton rows={6} />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Bookings"
-        description="Every booking on the platform."
+        title="All Bookings"
+        description="System-wide rental bookings overview and management."
       />
 
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {/* Status Filter */}
+      <div className="flex justify-end">
+        <div className="w-full sm:w-56">
+          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val || "ALL")}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+              <SelectItem value="ONGOING">Ongoing</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+              <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-      {bookings.length === 0 ? (
-        <EmptyState title="No bookings found" />
+      {filteredBookings.length === 0 ? (
+        <EmptyState
+          icon={Calendar}
+          title="No bookings found"
+          description="No bookings matched the selected status filter."
+        />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Customer</TableHead>
-              <TableHead>Vehicle</TableHead>
-              <TableHead>Dates</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bookings.map((booking) => (
-              <TableRow key={booking.id}>
-                <TableCell>{booking.user?.name ?? "—"}</TableCell>
-                <TableCell>{booking.vehicle?.name ?? "—"}</TableCell>
-                <TableCell className="text-xs">
-                  {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={booking.status} />
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={booking.paymentStatus} />
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(booking.totalPrice)}
-                </TableCell>
-              </TableRow>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto rounded-xl border bg-card shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Total Price</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBookings.map((booking) => (
+                  <TableRow key={booking.id}>
+                    <TableCell>
+                      <p className="font-semibold text-foreground">{booking.user?.name ?? "—"}</p>
+                      <p className="text-xs text-muted-foreground">{booking.user?.email}</p>
+                    </TableCell>
+                    <TableCell className="font-medium">{booking.vehicle?.name ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {booking.vehicle?.vendor?.name ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={booking.status} />
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(booking.totalPrice)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteBooking(booking)}
+                      >
+                        <Trash2 className="size-3.5 mr-1" />
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card Stack View */}
+          <div className="grid gap-4 md:hidden">
+            {filteredBookings.map((booking) => (
+              <Card key={booking.id}>
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-base">{booking.user?.name ?? "Customer"}</h3>
+                      <p className="text-xs text-muted-foreground">{booking.user?.email}</p>
+                    </div>
+                    <StatusBadge status={booking.status} />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-2 space-y-1 text-xs">
+                  <p><span className="font-medium text-foreground">Vehicle:</span> {booking.vehicle?.name ?? "—"}</p>
+                  <p><span className="font-medium text-foreground">Vendor:</span> {booking.vehicle?.vendor?.name ?? "—"}</p>
+                  <p><span className="font-medium text-foreground">Dates:</span> {formatDate(booking.startDate)} → {formatDate(booking.endDate)}</p>
+                  <div className="mt-2 flex items-center justify-between font-semibold text-sm">
+                    <span>Total:</span>
+                    <span>{formatCurrency(booking.totalPrice)}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => deleteBooking(booking)}
+                  >
+                    <Trash2 className="size-4 mr-1" />
+                    Delete Booking
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </>
       )}
     </div>
   )

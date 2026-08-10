@@ -7,9 +7,9 @@ import { PageLoader } from "@/components/shared/Loader"
 import { useAuthStore } from "@/lib/auth-store"
 
 const ROLE_DASHBOARD: Record<string, string> = {
-  ADMIN: "/dashboard/admin",
-  VENDOR: "/dashboard/vendor",
-  CUSTOMER: "/dashboard/customer",
+  ADMIN: "/dashboard/admin/overview",
+  VENDOR: "/dashboard/vendor/overview",
+  CUSTOMER: "/dashboard/customer/overview",
 }
 
 export default function DashboardIndexPage() {
@@ -18,7 +18,7 @@ export default function DashboardIndexPage() {
 
   useEffect(() => {
     if (!user) return
-    router.replace(ROLE_DASHBOARD[user.role] ?? "/dashboard/customer")
+    router.replace(ROLE_DASHBOARD[user.role] ?? "/dashboard/customer/overview")
   }, [user, router])
 
   return <PageLoader label="Taking you to your dashboard..." />

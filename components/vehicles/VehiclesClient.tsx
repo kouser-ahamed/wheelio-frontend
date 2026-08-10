@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from "react"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { VehicleCard } from "@/components/shared/VehicleCard"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -308,8 +308,15 @@ export function VehiclesClient() {
         title="Browse vehicles"
         description={`${total} vehicle${total === 1 ? "" : "s"} available`}
         action={
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger render={<Button variant="outline" className="lg:hidden" />}>
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(buttonVariants({ variant: "outline" }), "lg:hidden")}
+                />
+              }
+            >
               <SlidersHorizontal />
               Filters
             </SheetTrigger>

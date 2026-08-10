@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -44,14 +45,36 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  render,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { render?: React.ReactElement }) {
+  const classes = cn(buttonVariants({ variant, size, className }))
+
+  // If a `render` element is provided (common pattern in this codebase,
+  // e.g. `<Button render={<Link href="/..." />} />`) clone that element
+  // with the proper button classes and pass through event handlers/children.
+  if (render && React.isValidElement(render)) {
+    const renderedChildren = render.props.children ?? children
+    return React.cloneElement(render, {
+      className: cn(classes, render.props.className),
+      children: renderedChildren,
+      onClick: (e: any) => {
+        // call both element's onClick and user passed onClick if present
+        if (render.props.onClick) render.props.onClick(e)
+        if (props.onClick) props.onClick(e)
+      },
+    })
+  }
+
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={classes}
       {...props}
-    />
+    >
+      {children}
+    </ButtonPrimitive>
   )
 }
 

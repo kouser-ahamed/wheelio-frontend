@@ -1,13 +1,16 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
+import { Car, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
-import { PageLoader } from "@/components/shared/Loader"
-import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { PageHeader } from "@/components/shared/PageHeader"
 import { StatusBadge } from "@/components/shared/StatusBadge"
+import { TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -23,98 +26,164 @@ import type { ApiResponse, Vehicle } from "@/types"
 export default function AdminVehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+
+  const load = async () => {
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      const res = await axios.get<ApiResponse<Vehicle[]>>("/vehicles", {
+        params: { limit: 100 },
+      })
+      setVehicles(res.data.data ?? [])
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    let active = true
-    async function load() {
-      try {
-        const { default: axios } = await import("@/lib/axios")
-        const res = await axios.get<ApiResponse<Vehicle[]>>("/vehicles", {
-          params: { limit: 100 },
-        })
-        if (active) setVehicles(res.data.data ?? [])
-      } catch (err) {
-        if (active) setError(getErrorMessage(err))
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
     load()
-    return () => {
-      active = false
-    }
   }, [])
 
-  if (loading) return <PageLoader label="Loading vehicles..." />
+  const deleteVehicle = async (vehicle: Vehicle) => {
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      await axios.delete(`/vehicles/${vehicle.id}`)
+      setVehicles((prev) => prev.filter((v) => v.id !== vehicle.id))
+      toast.success("Vehicle deleted successfully")
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="All Vehicles" description="Overview of all vehicles across all vendors." />
+        <TableSkeleton rows={6} />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Vehicles"
-        description="All vehicles on the platform."
+        title="All Vehicles"
+        description="Overview of all vehicles across all vendors."
       />
 
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
       {vehicles.length === 0 ? (
-        <EmptyState title="No vehicles found" />
+        <EmptyState
+          icon={Car}
+          title="No vehicles found"
+          description="There are currently no vehicles listed in the platform."
+        />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Vehicle</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Vendor</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Price / day</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {vehicles.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-muted">
-                      {vehicle.images?.[0] ? (
-                        <Image
-                          src={vehicle.images[0]}
-                          alt={vehicle.name}
-                          fill
-                          sizes="40px"
-                          className="object-cover"
-                        />
-                      ) : null}
-                    </div>
-                    <div>
-                      <Link
-                        href={`/vehicles/${vehicle.id}`}
-                        className="font-medium hover:underline"
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto rounded-xl border bg-card shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Price / Day</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vehicles.map((vehicle) => (
+                  <TableRow key={vehicle.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="relative size-12 overflow-hidden rounded-md border bg-muted">
+                          {vehicle.images?.[0] ? (
+                            <Image src={vehicle.images[0]} alt="" fill sizes="48px" className="object-cover" />
+                          ) : null}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{vehicle.name}</p>
+                          <p className="text-xs text-muted-foreground">{vehicle.brand} · {vehicle.model}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{vehicle.category?.name ?? "—"}</TableCell>
+                    <TableCell className="font-medium text-foreground">
+                      {vehicle.vendor?.name ?? "—"}
+                    </TableCell>
+                    <TableCell className="font-medium">{formatCurrency(vehicle.pricePerDay)}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={vehicle.status} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteVehicle(vehicle)}
                       >
-                        {vehicle.name}
-                      </Link>
-                      <p className="text-xs text-muted-foreground">
-                        {vehicle.brand} · {vehicle.model}
-                      </p>
-                    </div>
+                        <Trash2 className="size-3.5 mr-1" />
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card Grid View */}
+          <div className="grid gap-6 sm:grid-cols-2 md:hidden">
+            {vehicles.map((vehicle) => (
+              <Card key={vehicle.id} className="overflow-hidden">
+                <CardHeader className="p-0">
+                  <div className="relative aspect-[16/10] w-full bg-muted">
+                    {vehicle.images?.[0] ? (
+                      <Image
+                        src={vehicle.images[0]}
+                        alt={vehicle.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    <StatusBadge
+                      status={vehicle.status}
+                      className="absolute right-3 top-3"
+                    />
                   </div>
-                </TableCell>
-                <TableCell>{vehicle.category?.name ?? "—"}</TableCell>
-                <TableCell>{vehicle.vendor?.name ?? vehicle.vendorId}</TableCell>
-                <TableCell>
-                  <StatusBadge status={vehicle.status} />
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(vehicle.pricePerDay)}
-                </TableCell>
-              </TableRow>
+                </CardHeader>
+                <CardContent className="p-4 space-y-1">
+                  <h3 className="font-semibold text-base">{vehicle.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Vendor: <span className="font-medium text-foreground">{vehicle.vendor?.name ?? "—"}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Category: {vehicle.category?.name ?? "—"}
+                  </p>
+                  <p className="mt-2 font-bold text-primary">
+                    {formatCurrency(vehicle.pricePerDay)}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      /day
+                    </span>
+                  </p>
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => deleteVehicle(vehicle)}
+                  >
+                    <Trash2 className="size-4 mr-1" />
+                    Delete Vehicle
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </>
       )}
     </div>
   )

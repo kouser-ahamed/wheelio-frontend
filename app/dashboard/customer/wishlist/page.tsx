@@ -2,13 +2,13 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, Trash2 } from "lucide-react"
+import { ExternalLink, Heart, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { PageLoader } from "@/components/shared/Loader"
-import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { CardGridSkeleton } from "@/components/dashboard/DashboardSkeletons"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -53,12 +53,22 @@ export default function WishlistPage() {
     }
   }
 
-  if (loading) return <PageLoader label="Loading wishlist..." />
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="My Wishlist"
+          description="Vehicles you've saved for later."
+        />
+        <CardGridSkeleton count={6} />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="My wishlist"
+        title="My Wishlist"
         description="Vehicles you've saved for later."
       />
 
@@ -66,15 +76,15 @@ export default function WishlistPage() {
         <EmptyState
           icon={Heart}
           title="Your wishlist is empty"
-          description="Tap the heart icon on any vehicle to save it here."
+          description="Explore our vehicles fleet and tap the heart icon on any vehicle to save it here."
           action={
-            <Button render={<Link href="/vehicles" />}>Browse vehicles</Button>
+            <Button render={<Link href="/vehicles" />}>Browse Vehicles</Button>
           }
         />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.id} className="overflow-hidden">
               <CardHeader className="p-0">
                 <Link href={`/vehicles/${item.vehicleId}`}>
                   <div className="relative aspect-[16/10] w-full bg-muted">
@@ -84,19 +94,19 @@ export default function WishlistPage() {
                         alt={item.vehicle.name}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover"
+                        className="object-cover transition-transform hover:scale-105"
                       />
                     ) : null}
                   </div>
                 </Link>
               </CardHeader>
               <CardContent className="p-4">
-                <h3 className="font-semibold">{item.vehicle?.name ?? "Vehicle"}</h3>
+                <h3 className="font-semibold text-base">{item.vehicle?.name ?? "Vehicle"}</h3>
                 <p className="text-sm text-muted-foreground">
                   {item.vehicle?.category?.name ?? "—"}
                 </p>
                 {item.vehicle ? (
-                  <p className="mt-2 font-semibold">
+                  <p className="mt-2 font-bold text-primary">
                     {formatCurrency(item.vehicle.pricePerDay)}
                     <span className="text-xs font-normal text-muted-foreground">
                       /day
@@ -111,7 +121,8 @@ export default function WishlistPage() {
                   className="flex-1"
                   render={<Link href={`/vehicles/${item.vehicleId}`} />}
                 >
-                  View
+                  <ExternalLink className="size-4 mr-1" />
+                  View Details
                 </Button>
                 <Button
                   variant="destructive"
@@ -119,7 +130,7 @@ export default function WishlistPage() {
                   className="flex-1"
                   onClick={() => remove(item)}
                 >
-                  <Trash2 />
+                  <Trash2 className="size-4 mr-1" />
                   Remove
                 </Button>
               </CardFooter>
