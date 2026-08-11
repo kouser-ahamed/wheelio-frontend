@@ -44,6 +44,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { href: "/dashboard/admin/categories", label: "Categories", icon: FolderKanban },
     { href: "/dashboard/admin/vehicles", label: "Vehicles", icon: Car },
     { href: "/dashboard/admin/bookings", label: "Bookings", icon: ClipboardList },
+    { href: "/dashboard/admin/reviews", label: "Reviews", icon: Star },
     { href: "/dashboard/admin/profile", label: "Profile", icon: UserIcon },
   ],
   VENDOR: [

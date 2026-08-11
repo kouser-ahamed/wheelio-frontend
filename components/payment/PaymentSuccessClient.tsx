@@ -63,6 +63,7 @@ const PAYMENT_LABELS: Record<PaymentStatus, string> = {
 export function PaymentSuccessClient() {
   const searchParams = useSearchParams()
   const bookingId = searchParams.get("bookingId")
+  const sessionId = searchParams.get("session_id")
 
   const [booking, setBooking] = useState<BookingData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,43 +73,43 @@ export function PaymentSuccessClient() {
     let active = true
 
     async function load() {
-      if (!bookingId) {
+      if (!sessionId) {
+        setError(
+          "No payment session was found. Please check your bookings for the latest status."
+        )
         setLoading(false)
         return
       }
 
       const { default: axios } = await import("@/lib/axios")
 
-      // The webhook that flips the booking to PAID fires asynchronously after
-      // Stripe redirects the customer back to this page, so retry with
-      // exponential backoff before declaring the booking not found.
+      // Ask the backend to verify the Checkout Session with Stripe directly.
+      // The payment is normally confirmed by the time the customer lands here,
+      // but retry with exponential backoff in case Stripe is still processing.
       const backoffDelays = [1000, 2000, 4000, 8000]
       const maxAttempts = backoffDelays.length + 1
       let lastError: string | null = null
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
-          const res = await axios.get<ApiResponse<BookingData>>(
-            `/bookings/${bookingId}`
-          )
+          const res = await axios.post<
+            ApiResponse<{ paid: boolean; booking: BookingData | null }>
+          >("/payments/verify-session", { session_id: sessionId })
           const data = res.data.data
           if (!active) return
 
-          setBooking(data)
+          setBooking(data.booking)
           setError(null)
 
-          // Key off the BOOKING's paymentStatus: once PAID the booking is
-          // settled (REFUNDED is also terminal). Keep polling otherwise rather
-          // than showing a premature failure.
-          if (
-            data.paymentStatus === "PAID" ||
-            data.paymentStatus === "REFUNDED"
-          ) {
+          // Idempotent: the backend returns paid:true once the booking is
+          // settled (REFUNDED is also terminal). Keep retrying while Stripe is
+          // still processing.
+          if (data.paid && data.booking) {
             if (active) setLoading(false)
             return
           }
 
-          // The record exists but payment hasn't settled yet: keep polling.
+          // Not settled yet: keep retrying.
           lastError = null
         } catch (err) {
           if (!active) return
@@ -129,9 +130,11 @@ export function PaymentSuccessClient() {
     return () => {
       active = false
     }
-  }, [bookingId])
+  }, [sessionId])
 
   if (loading) return <PageLoader label="Confirming payment..." />
+
+  const displayBookingId = bookingId ?? booking?.id
 
   const isPaid = booking?.paymentStatus === "PAID"
   const isRefunded = booking?.paymentStatus === "REFUNDED"
@@ -240,12 +243,16 @@ export function PaymentSuccessClient() {
           )}
 
           <div className="flex flex-col gap-3">
-            <Button
-              render={<Link href={`/dashboard/customer/bookings/${bookingId}`} />}
-            >
-              <Eye className="size-4 mr-1" />
-              View Booking Details
-            </Button>
+            {displayBookingId ? (
+              <Button
+                render={
+                  <Link href={`/dashboard/customer/bookings/${displayBookingId}`} />
+                }
+              >
+                <Eye className="size-4 mr-1" />
+                View Booking Details
+              </Button>
+            ) : null}
             <Button variant="outline" render={<Link href="/dashboard/customer/bookings" />}>
               Go to My Bookings
             </Button>

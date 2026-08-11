@@ -10,6 +10,8 @@ export type BookingStatus =
 
 export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED"
 
+export type ReactionType = "LIKE" | "DISLIKE"
+
 export interface User {
   id: string
   name: string
@@ -102,6 +104,31 @@ export interface Booking {
   }
 }
 
+export interface ReviewReply {
+  id: string
+  reviewId: string
+  vendorId: string
+  content: string
+  createdAt: string
+  updatedAt: string
+  vendor?: {
+    id: string
+    name: string
+  }
+}
+
+export interface ReviewReaction {
+  id: string
+  reviewId: string
+  userId: string
+  type: ReactionType
+  createdAt: string
+  user?: {
+    id: string
+    name: string
+  }
+}
+
 export interface Review {
   id: string
   userId: string
@@ -115,6 +142,15 @@ export interface Review {
     id: string
     name: string
     profileImage?: string | null
+  }
+  reply?: ReviewReply | null
+  likeCount?: number
+  dislikeCount?: number
+  myReaction?: { id: string; type: ReactionType } | null
+  reactions?: ReviewReaction[]
+  vehicle?: {
+    id: string
+    name: string
   }
 }
 

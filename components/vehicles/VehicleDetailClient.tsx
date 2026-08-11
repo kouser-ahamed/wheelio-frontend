@@ -11,11 +11,11 @@ import {
   ShieldCheck,
   Star,
   Truck,
-  User as UserIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { VehicleReviewsSection } from "@/components/vehicles/VehicleReviewsSection"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { PageLoader } from "@/components/shared/Loader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -80,7 +80,9 @@ export function VehicleDetailClient({ vehicleId }: { vehicleId: string }) {
       const { default: axios } = await import("@/lib/axios")
       const [vehicleRes, reviewsRes] = await Promise.all([
         axios.get<ApiResponse<Vehicle>>(`/vehicles/${vehicleId}`),
-        axios.get<ApiResponse<Review[]>>(`/reviews/vehicle/${vehicleId}`),
+        axios.get<ApiResponse<Review[]>>(`/reviews/vehicle/${vehicleId}`, {
+          params: { limit: 100 },
+        }),
       ])
       setVehicle(vehicleRes.data.data)
       setReviews(reviewsRes.data.data ?? [])
@@ -94,6 +96,22 @@ export function VehicleDetailClient({ vehicleId }: { vehicleId: string }) {
   useEffect(() => {
     loadVehicle()
   }, [loadVehicle])
+
+  const refreshReviews = useCallback(async () => {
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      const [vehicleRes, reviewsRes] = await Promise.all([
+        axios.get<ApiResponse<Vehicle>>(`/vehicles/${vehicleId}`),
+        axios.get<ApiResponse<Review[]>>(`/reviews/vehicle/${vehicleId}`, {
+          params: { limit: 100 },
+        }),
+      ])
+      setVehicle(vehicleRes.data.data)
+      setReviews(reviewsRes.data.data ?? [])
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }, [vehicleId])
 
   const isOwnVehicle = !!(
     isAuthenticated &&
@@ -384,20 +402,11 @@ export function VehicleDetailClient({ vehicleId }: { vehicleId: string }) {
             </Card>
           </section>
 
-          <section>
-            <h2 className="text-xl font-bold">Reviews</h2>
-            {reviews.length > 0 ? (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {reviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-muted-foreground">
-                No reviews yet. Be the first to share your experience.
-              </p>
-            )}
-          </section>
+          <VehicleReviewsSection
+            vehicle={vehicle}
+            reviews={reviews}
+            refreshReviews={refreshReviews}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -489,45 +498,4 @@ export function VehicleDetailClient({ vehicleId }: { vehicleId: string }) {
   )
 }
 
-function ReviewCard({ review }: { review: Review }) {
-  return (
-    <Card>
-      <CardHeader className="flex-row items-center gap-3 space-y-0">
-        <Avatar>
-          {review.user?.profileImage ? (
-            <AvatarImage src={review.user.profileImage} alt={review.user.name} />
-          ) : null}
-          <AvatarFallback>
-            <UserIcon className="size-4" />
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <CardTitle className="text-sm">
-            {review.user?.name ?? "Anonymous"}
-          </CardTitle>
-          <CardDescription>
-            {new Date(review.createdAt).toLocaleDateString()}
-          </CardDescription>
-        </div>
-        <div className="ml-auto flex items-center gap-0.5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className={cn(
-                "size-4",
-                i < review.rating
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-muted"
-              )}
-            />
-          ))}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          {review.comment ?? "No comment."}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
+
