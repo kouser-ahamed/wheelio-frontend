@@ -81,7 +81,14 @@ function ReactionsDialog({
 }) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  // const deleteReaction = async (reactionId: string) => {
+  //   setDeleting(reactionId)
+  //   try {
+  //     const { default: axios } = await import("@/lib/axios")
+  //     await axios.delete(`/reviews/${review.id}/react/${reactionId}`)
+
   const deleteReaction = async (reactionId: string) => {
+    if (!review) return
     setDeleting(reactionId)
     try {
       const { default: axios } = await import("@/lib/axios")
