@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, UploadCloud, User as UserIcon } from "lucide-react"
+import { Check, Loader2, UploadCloud, User as UserIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -35,6 +35,7 @@ export function UserProfileForm() {
   const { user, token, setAuth } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [savingImage, setSavingImage] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(user?.profileImage ?? null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -67,6 +68,30 @@ export function UserProfileForm() {
       toast.error(getErrorMessage(err))
     } finally {
       setUploading(false)
+    }
+  }
+
+  const hasPendingImage =
+    !!user && !!profileImage && profileImage !== user.profileImage
+
+  const handleSaveImage = async () => {
+    if (!user || !profileImage) return
+    setSavingImage(true)
+    try {
+      const { default: axios } = await import("@/lib/axios")
+      const res = await axios.patch<ApiResponse<User>>(`/users/${user.id}`, {
+        profileImage,
+      })
+
+      const updatedUser = res.data.data
+      if (token && updatedUser) {
+        setAuth(updatedUser, token)
+      }
+      toast.success("Profile picture saved successfully!")
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setSavingImage(false)
     }
   }
 
@@ -107,20 +132,37 @@ export function UserProfileForm() {
           </AvatarFallback>
         </Avatar>
         <div className="space-y-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <UploadCloud className="size-4" />
-            )}
-            {uploading ? "Uploading..." : "Upload photo"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <UploadCloud className="size-4" />
+              )}
+              {uploading ? "Uploading..." : "Upload photo"}
+            </Button>
+            {hasPendingImage ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSaveImage}
+                disabled={savingImage || uploading}
+              >
+                {savingImage ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Check className="size-4" />
+                )}
+                {savingImage ? "Saving..." : "Save"}
+              </Button>
+            ) : null}
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -129,7 +171,8 @@ export function UserProfileForm() {
             onChange={(e) => handleImageUpload(e.target.files?.[0])}
           />
           <p className="text-xs text-muted-foreground">
-            JPG, PNG or WEBP up to 5MB (ImgBB hosted).
+            JPG, PNG or WEBP up to 5MB (ImgBB hosted). Click &ldquo;Save&rdquo; to
+            apply your new photo.
           </p>
         </div>
       </div>

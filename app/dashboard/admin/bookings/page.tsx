@@ -114,7 +114,17 @@ export default function AdminBookingsPage() {
         <>
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto rounded-xl border bg-card shadow-sm">
-            <Table>
+            <Table className="xl:table-fixed">
+              <colgroup>
+                <col className="xl:w-[14%]" />
+                <col className="xl:w-[12%]" />
+                <col className="xl:w-[12%]" />
+                <col className="xl:w-[13%]" />
+                <col className="xl:w-[9%]" />
+                <col className="xl:w-[10%]" />
+                <col className="xl:w-[11%]" />
+                <col className="xl:w-[19%]" />
+              </colgroup>
               <TableHeader>
                 <TableRow>
                   <TableHead>Customer</TableHead>
@@ -130,16 +140,22 @@ export default function AdminBookingsPage() {
               <TableBody>
                 {filteredBookings.map((booking) => (
                   <TableRow key={booking.id}>
-                    <TableCell>
-                      <p className="font-semibold text-foreground">{booking.user?.name ?? "—"}</p>
-                      <p className="text-xs text-muted-foreground">{booking.user?.email}</p>
+                    <TableCell className="overflow-hidden">
+                      <p className="max-w-28 truncate font-semibold text-foreground">
+                        {booking.user?.name ?? "—"}
+                      </p>
+                      <p className="max-w-28 truncate text-xs text-muted-foreground">
+                        {booking.user?.email}
+                      </p>
                     </TableCell>
-                    <TableCell className="font-medium">{booking.vehicle?.name ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {booking.vehicle?.vendor?.name ?? "—"}
+                    <TableCell className="overflow-hidden font-medium">
+                      <p className="max-w-28 truncate">{booking.vehicle?.name ?? "—"}</p>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
+                    <TableCell className="overflow-hidden text-sm text-muted-foreground">
+                      <p className="max-w-28 truncate">{booking.vehicle?.vendor?.name ?? "—"}</p>
+                    </TableCell>
+                    <TableCell className="whitespace-normal text-xs text-muted-foreground">
+                      <p className="max-w-36">{formatDate(booking.startDate)} → {formatDate(booking.endDate)}</p>
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={booking.status} />

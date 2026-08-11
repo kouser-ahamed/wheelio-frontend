@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   Car,
+  ChevronDown,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -152,6 +153,10 @@ export function Navbar() {
                 <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
                   {user.name}
                 </span>
+                <ChevronDown
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground flex items-center gap-2">
@@ -166,10 +171,6 @@ export function Navbar() {
                 <DropdownMenuItem onClick={handleDashboardClick}>
                   <LayoutDashboard />
                   Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleProfileClick}>
-                  <UserRound />
-                  My Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onClick={handleLogout}>

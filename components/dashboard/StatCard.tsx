@@ -25,8 +25,10 @@ export function StatCard({
           <Icon className="size-5" />
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold tracking-tight">{value}</p>
+          <p className="truncate text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="break-words text-2xl font-bold tracking-tight xl:text-xl">
+            {value}
+          </p>
           {hint ? (
             <p className="truncate text-xs text-muted-foreground">{hint}</p>
           ) : null}
