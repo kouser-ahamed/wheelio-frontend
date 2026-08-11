@@ -233,11 +233,11 @@ export default function VendorBookingsPage() {
                 <Card key={booking.id}>
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-base">{booking.user?.name ?? "Customer"}</h3>
-                        <p className="text-xs text-muted-foreground">{booking.user?.email}</p>
+                      <div className="min-w-0">
+                        <h3 className="truncate font-semibold text-base">{booking.user?.name ?? "Customer"}</h3>
+                        <p className="truncate text-xs text-muted-foreground">{booking.user?.email}</p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-2">
                         <StatusBadge status={booking.status} />
                         <StatusBadge status={booking.paymentStatus} />
                       </div>

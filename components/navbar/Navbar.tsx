@@ -186,10 +186,10 @@ export function Navbar() {
                 render={<Link href="/login" />}
               >
                 <UserIcon />
-                Login
+                <span className="hidden sm:inline">Login</span>
               </Button>
               <Button size="sm" render={<Link href="/register" />}>
-                Register
+                <span className="hidden sm:inline">Register</span>
               </Button>
             </>
           )}

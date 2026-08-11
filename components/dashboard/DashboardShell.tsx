@@ -213,7 +213,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   Dashboard Menu
                 </SheetTitle>
               </SheetHeader>
-              <div className="h-[calc(100vh-4rem)]">{sidebar}</div>
+              <div className="h-[calc(100dvh-4rem)]">{sidebar}</div>
             </SheetContent>
           </Sheet>
         </div>

@@ -182,9 +182,9 @@ export default function AdminBookingsPage() {
               <Card key={booking.id}>
                 <CardHeader className="p-4 pb-2">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-base">{booking.user?.name ?? "Customer"}</h3>
-                      <p className="text-xs text-muted-foreground">{booking.user?.email}</p>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-base">{booking.user?.name ?? "Customer"}</h3>
+                      <p className="truncate text-xs text-muted-foreground">{booking.user?.email}</p>
                     </div>
                     <StatusBadge status={booking.status} />
                   </div>

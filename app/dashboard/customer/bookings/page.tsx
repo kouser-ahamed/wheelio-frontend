@@ -227,7 +227,7 @@ export default function CustomerBookingsPage() {
                 <Card key={booking.id}>
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">{booking.vehicle?.name ?? "Vehicle"}</h3>
+                      <h3 className="min-w-0 font-semibold">{booking.vehicle?.name ?? "Vehicle"}</h3>
                       <StatusBadge
                         status={booking.status}
                         label={BOOKING_LABELS[booking.status]}
@@ -250,7 +250,7 @@ export default function CustomerBookingsPage() {
                       <span>{formatCurrency(booking.totalPrice)}</span>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex gap-2 p-4 pt-0">
+                  <CardFooter className="flex flex-wrap gap-2 p-4 pt-0">
                     <Button
                       size="sm"
                       variant="outline"

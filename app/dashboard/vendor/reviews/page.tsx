@@ -143,8 +143,8 @@ export default function VendorReviewsPage() {
             <Card key={review.id} className="flex flex-col justify-between">
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="size-8">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Avatar className="size-8 shrink-0">
                       {review.user?.profileImage ? (
                         <AvatarImage src={review.user.profileImage} alt={review.user.name} />
                       ) : null}
@@ -152,9 +152,9 @@ export default function VendorReviewsPage() {
                         {review.user?.name ? review.user.name.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="text-sm font-semibold">{review.user?.name ?? "Customer"}</p>
-                      <p className="text-xs text-muted-foreground">{vehicleName}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{review.user?.name ?? "Customer"}</p>
+                      <p className="truncate text-xs text-muted-foreground">{vehicleName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-amber-500 font-semibold text-sm">

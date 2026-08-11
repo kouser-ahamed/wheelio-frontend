@@ -146,11 +146,11 @@ export default function HomePage() {
                 <p className="text-2xl font-bold text-foreground">200+</p>
                 <p className="text-xs text-muted-foreground">Verified Vehicles</p>
               </div>
-              <div className="p-2 border-l border-border/50">
+              <div className="p-2 border-l border-t border-border/50 max-sm:border-l-0 sm:border-t-0">
                 <p className="text-2xl font-bold text-foreground">4.9 ★</p>
                 <p className="text-xs text-muted-foreground">Customer Rating</p>
               </div>
-              <div className="p-2 border-l border-border/50">
+              <div className="p-2 border-l border-t border-border/50 sm:border-t-0">
                 <p className="text-2xl font-bold text-foreground">24/7</p>
                 <p className="text-xs text-muted-foreground">Support Available</p>
               </div>
@@ -161,7 +161,7 @@ export default function HomePage() {
 
       {/* Featured Categories Section */}
       <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-primary">Categories</span>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Browse by Category</h2>
@@ -210,7 +210,7 @@ export default function HomePage() {
 
       {/* Popular Vehicles Section */}
       <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-primary">Featured Fleet</span>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Popular Vehicles</h2>

@@ -97,7 +97,7 @@ export function UserProfileForm() {
 
   return (
     <div className="max-w-xl space-y-6 rounded-xl border bg-card p-6 shadow-sm">
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
         <Avatar className="size-20 border">
           {profileImage ? (
             <AvatarImage src={profileImage} alt={user.name} className="object-cover" />

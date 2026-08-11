@@ -146,9 +146,9 @@ export default function BookingDetailPage({
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="size-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">{booking.vehicle?.name ?? "Vehicle"}</h2>
+          <div className="flex min-w-0 items-center gap-2">
+            <Calendar className="size-5 shrink-0 text-muted-foreground" />
+            <h2 className="min-w-0 text-lg font-semibold">{booking.vehicle?.name ?? "Vehicle"}</h2>
           </div>
           <Button
             size="sm"
