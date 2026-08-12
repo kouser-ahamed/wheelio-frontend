@@ -77,6 +77,13 @@ export default function VendorVehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const categoryItems = categories.reduce<Record<string, string>>(
+    (acc, category) => {
+      acc[category.id] = category.name
+      return acc
+    },
+    {}
+  )
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -346,7 +353,11 @@ export default function VendorVehiclesPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        items={categoryItems}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Category" />
                         </SelectTrigger>
