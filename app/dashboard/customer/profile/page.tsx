@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/shared/PageHeader"
 import { UserProfileForm } from "@/components/dashboard/UserProfileForm"
-import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm"
+import { ProfileSecuritySection } from "@/components/dashboard/ProfileSecuritySection"
 
 export default function CustomerProfilePage() {
   return (
@@ -12,7 +12,7 @@ export default function CustomerProfilePage() {
         description="Update your personal details and profile picture."
       />
       <UserProfileForm />
-      <ChangePasswordForm />
+      <ProfileSecuritySection />
     </div>
   )
 }

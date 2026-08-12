@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/shared/PageHeader"
 import { UserProfileForm } from "@/components/dashboard/UserProfileForm"
-import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm"
+import { ProfileSecuritySection } from "@/components/dashboard/ProfileSecuritySection"
 
 export default function AdminProfilePage() {
   return (
@@ -12,7 +12,7 @@ export default function AdminProfilePage() {
         description="Update your administrator profile details and profile picture."
       />
       <UserProfileForm />
-      <ChangePasswordForm />
+      <ProfileSecuritySection />
     </div>
   )
 }

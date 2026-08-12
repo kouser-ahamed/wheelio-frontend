@@ -21,6 +21,7 @@ export interface User {
   profileImage?: string | null
   role: UserRole
   authProvider: string
+  hasPassword?: boolean
   isDeleted: boolean
   isBlocked: boolean
   createdAt: string

@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/shared/PageHeader"
 import { UserProfileForm } from "@/components/dashboard/UserProfileForm"
-import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm"
+import { ProfileSecuritySection } from "@/components/dashboard/ProfileSecuritySection"
 
 export default function VendorProfilePage() {
   return (
@@ -12,7 +12,7 @@ export default function VendorProfilePage() {
         description="Update your vendor business profile and contact info."
       />
       <UserProfileForm />
-      <ChangePasswordForm />
+      <ProfileSecuritySection />
     </div>
   )
 }
